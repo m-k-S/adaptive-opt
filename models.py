@@ -112,7 +112,6 @@ class Activs_prober(nn.Module):
         else:
             return self.cal_prop(input)
 
-
 ### VGG
 class VGG(nn.Module):
     def __init__(self, cfg, n_classes=100, p_grouping=1.0, probe=True, group_list=None):

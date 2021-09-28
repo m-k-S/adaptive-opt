@@ -4,10 +4,12 @@ import time
 import math
 import torch
 import numpy as np
-import torch.optim as optim
+# import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
+
+from optim import SGD
 from utils import progress_bar
 
 
@@ -27,7 +29,7 @@ criterion = nn.CrossEntropyLoss()
 ######### Optimizers #########
 def get_optimizer(net, lr, wd, opt_type="SGD"):
 	if(opt_type=="SGD"):
-		optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
+		optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd)
 	return optimizer
 
 class LR_Scheduler(object):

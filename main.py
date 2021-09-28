@@ -90,5 +90,5 @@ if __name__ == "__main__":
 			accs_dict['Test'].append(test_acc)
 			epoch += 1
 			if((batchsize==256 and epoch%5==0) or (batchsize<32)):
-				net_save(net, accs_dict, lr_warmup)
+				net_save(net, accs_dict, lr_warmup, trained_root)
 		lr_ind += 1
