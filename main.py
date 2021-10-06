@@ -56,43 +56,89 @@ base_sched, base_epochs, wd = base_sched_iter, base_epochs_iter, wd_base # Train
 total_epochs = np.sum(base_epochs)
 
 if __name__ == "__main__":
-	suffix = ""
-	# Train
-	print("\n------------------ Training ------------------\n")
-	best_acc = 0
-	lr_ind = 0
-	epoch = 0
-	base_lr = init_lr * base_sched[0]
-	final_lr = init_lr * base_sched[-1]
+	if expt = "full":
+		for ablation_setting in [True, False]:
+			for optimizer_type in ["SGD", "RMSProp"]:
+				suffix = "ablate{}_optim{}".format(str(ablation_setting), optimizer_type)
 
-	if(lr_warmup):
-		warmup_lr = 0
-		warmup_epochs = 1 if batchsize==16 else 5
+				# Train
+				print("\n------------------ Training ------------------\n")
+				best_acc = 0
+				lr_ind = 0
+				epoch = 0
+				base_lr = init_lr * base_sched[0]
+				final_lr = init_lr * base_sched[-1]
+
+				if(lr_warmup):
+					warmup_lr = 0
+					warmup_epochs = 1 if batchsize==16 else 5
+				else:
+					warmup_lr = base_lr
+					warmup_epochs = 0
+
+				net = VGG(cfg).to(device)
+				accs_dict = {'Train': [], 'Test': []}
+
+				trainloader, testloader = get_dataloader(dataset, download, batchsize)
+				optimizer = get_optimizer(net, opt_type=optimizer_type, lr=warmup_lr, wd=wd, ablate_bn=ablation_setting)
+				scheduler = LR_Scheduler(optimizer, warmup_epochs=warmup_epochs, warmup_lr=warmup_lr, num_epochs=total_epochs, base_lr=base_lr, final_lr=final_lr, iter_per_epoch=len(trainloader))
+
+				stop_train = False
+				while(lr_ind < len(base_sched)):
+					if(stop_train):
+						break
+					print("\n--learning rate is {}".format(optimizer.param_groups[0]['lr']))
+					for n in range(base_epochs[lr_ind]):
+						print('\nEpoch: {}'.format(epoch))
+						train_acc, stop_train = train(net, trainloader, device, optimizer, criterion, scheduler)
+						if(stop_train):
+							break
+						test_acc = test(net, testloader, device, criterion)
+						accs_dict['Train'].append(train_acc)
+						accs_dict['Test'].append(test_acc)
+						epoch += 1
+						if((batchsize==256 and epoch%5==0) or (batchsize<32)):
+							net_save(net, accs_dict, lr_warmup, trained_root, suffix)
+					lr_ind += 1
+
 	else:
-		warmup_lr = base_lr
-		warmup_epochs = 0
+		suffix = "basic"
+		# Train
+		print("\n------------------ Training ------------------\n")
+		best_acc = 0
+		lr_ind = 0
+		epoch = 0
+		base_lr = init_lr * base_sched[0]
+		final_lr = init_lr * base_sched[-1]
 
-	net = VGG(cfg).to(device)
-	accs_dict = {'Train': [], 'Test': []}
+		if(lr_warmup):
+			warmup_lr = 0
+			warmup_epochs = 1 if batchsize==16 else 5
+		else:
+			warmup_lr = base_lr
+			warmup_epochs = 0
 
-	trainloader, testloader = get_dataloader(dataset, download, batchsize)
-	optimizer = get_optimizer(net, opt_type=opt_type, lr=warmup_lr, wd=wd, ablate_bn=ablate_bn)
-	scheduler = LR_Scheduler(optimizer, warmup_epochs=warmup_epochs, warmup_lr=warmup_lr, num_epochs=total_epochs, base_lr=base_lr, final_lr=final_lr, iter_per_epoch=len(trainloader))
+		net = VGG(cfg).to(device)
+		accs_dict = {'Train': [], 'Test': []}
 
-	stop_train = False
-	while(lr_ind < len(base_sched)):
-		if(stop_train):
-			break
-		print("\n--learning rate is {}".format(optimizer.param_groups[0]['lr']))
-		for n in range(base_epochs[lr_ind]):
-			print('\nEpoch: {}'.format(epoch))
-			train_acc, stop_train = train(net, trainloader, device, optimizer, criterion, scheduler)
+		trainloader, testloader = get_dataloader(dataset, download, batchsize)
+		optimizer = get_optimizer(net, opt_type=opt_type, lr=warmup_lr, wd=wd, ablate_bn=ablate_bn)
+		scheduler = LR_Scheduler(optimizer, warmup_epochs=warmup_epochs, warmup_lr=warmup_lr, num_epochs=total_epochs, base_lr=base_lr, final_lr=final_lr, iter_per_epoch=len(trainloader))
+
+		stop_train = False
+		while(lr_ind < len(base_sched)):
 			if(stop_train):
 				break
-			test_acc = test(net, testloader, device, criterion)
-			accs_dict['Train'].append(train_acc)
-			accs_dict['Test'].append(test_acc)
-			epoch += 1
-			if((batchsize==256 and epoch%5==0) or (batchsize<32)):
-				net_save(net, accs_dict, lr_warmup, trained_root, suffix)
-		lr_ind += 1
+			print("\n--learning rate is {}".format(optimizer.param_groups[0]['lr']))
+			for n in range(base_epochs[lr_ind]):
+				print('\nEpoch: {}'.format(epoch))
+				train_acc, stop_train = train(net, trainloader, device, optimizer, criterion, scheduler)
+				if(stop_train):
+					break
+				test_acc = test(net, testloader, device, criterion)
+				accs_dict['Train'].append(train_acc)
+				accs_dict['Test'].append(test_acc)
+				epoch += 1
+				if((batchsize==256 and epoch%5==0) or (batchsize<32)):
+					net_save(net, accs_dict, lr_warmup, trained_root, suffix)
+			lr_ind += 1

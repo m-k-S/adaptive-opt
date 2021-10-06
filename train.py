@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 
-from optim import SGD
+from optim import SGD, RMSprop
 from utils import progress_bar
 
 
@@ -27,10 +27,13 @@ def train_network(dataset, bsize):
 criterion = nn.CrossEntropyLoss()
 
 ######### Optimizers #########
+
 def get_optimizer(net, lr, wd, ablate_bn, opt_type="SGD"):
-	if(opt_type=="SGD"):
-		optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
-	return optimizer
+    if opt_type == "SGD":
+        optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
+    elif opt_type == "RMSProp":
+        optimizer = RMSprop(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
+    return optimizer
 
 class LR_Scheduler(object):
     def __init__(self, optimizer, warmup_epochs, warmup_lr, num_epochs, base_lr, final_lr, iter_per_epoch):
