@@ -27,9 +27,9 @@ def train_network(dataset, bsize):
 criterion = nn.CrossEntropyLoss()
 
 ######### Optimizers #########
-def get_optimizer(net, lr, wd, opt_type="SGD"):
+def get_optimizer(net, lr, wd, ablate_bn, opt_type="SGD"):
 	if(opt_type=="SGD"):
-		optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd)
+		optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
 	return optimizer
 
 class LR_Scheduler(object):

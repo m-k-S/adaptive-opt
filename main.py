@@ -31,6 +31,7 @@ args = parser.parse_args()
 ### temporary hard coded args ###
 p_grouping = 32
 probe_layers = True
+ablate_bn = False # remove adaptive optimization that arises from BN
 skipinit = False
 preact = False
 dataset = "CIFAR-100"
@@ -41,7 +42,9 @@ seed = 0
 download = True
 lr_warmup = False
 
+trained_root = "trained/"
 device='cpu'
+expt = "full" # or "test"
 
 cfg = [64, (64, 2), 128, (128, 2), 256, (256, 2), 512, (512, 2), 512, 512]
 
@@ -53,6 +56,7 @@ base_sched, base_epochs, wd = base_sched_iter, base_epochs_iter, wd_base # Train
 total_epochs = np.sum(base_epochs)
 
 if __name__ == "__main__":
+	suffix = ""
 	# Train
 	print("\n------------------ Training ------------------\n")
 	best_acc = 0
@@ -68,11 +72,11 @@ if __name__ == "__main__":
 		warmup_lr = base_lr
 		warmup_epochs = 0
 
-	net = VGG(cfg)
+	net = VGG(cfg).to(device)
 	accs_dict = {'Train': [], 'Test': []}
 
 	trainloader, testloader = get_dataloader(dataset, download, batchsize)
-	optimizer = get_optimizer(net, opt_type=opt_type, lr=warmup_lr, wd=wd)
+	optimizer = get_optimizer(net, opt_type=opt_type, lr=warmup_lr, wd=wd, ablate_bn=ablate_bn)
 	scheduler = LR_Scheduler(optimizer, warmup_epochs=warmup_epochs, warmup_lr=warmup_lr, num_epochs=total_epochs, base_lr=base_lr, final_lr=final_lr, iter_per_epoch=len(trainloader))
 
 	stop_train = False
@@ -90,5 +94,5 @@ if __name__ == "__main__":
 			accs_dict['Test'].append(test_acc)
 			epoch += 1
 			if((batchsize==256 and epoch%5==0) or (batchsize<32)):
-				net_save(net, accs_dict, lr_warmup, trained_root)
+				net_save(net, accs_dict, lr_warmup, trained_root, suffix)
 		lr_ind += 1
