@@ -150,10 +150,16 @@ class VGG(nn.Module):
                 in_channels = x[0]
             else:
                 n_groups = (int(self.p_grouping) if (self.p_grouping>1) else int(np.ceil(x * self.p_grouping))) if self.group_list==None else self.group_list[gid]
-                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
-                           Conv_prober() if self.probe else nn.Identity()]
-                layers += [BN_self(x), nn.ReLU(inplace=True)]
-                layers += [Activs_prober() if self.probe else nn.Identity()]
+                s.add_module("conv{}".format(gid), nn.Conv2d(in_channels, x, kernel_size=3, padding=1, stride=2))
+                s.add_module("conv_prober{}".format(gid), Conv_prober() if self.probe else nn.Identity())
+                s.add_module("bn{}".format(gid), BN_self(x))
+                s.add_module("activs{}".format(gid), nn.ReLU(inplace=True))
+                s.add_module("activ_prober{}".format(gid), Activs_prober() if self.probe else nn.Identity())
+
+                # layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
+                #            Conv_prober() if self.probe else nn.Identity()]
+                # layers += [BN_self(x), nn.ReLU(inplace=True)]
+                # layers += [Activs_prober() if self.probe else nn.Identity()]
                 in_channels = x
         # return nn.Sequential(*layers)
         return s
