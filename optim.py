@@ -108,7 +108,7 @@ class SGD(Optimizer):
                 state = self.state[p]
                 state['momentum_buffer'] = momentum_buffer
 
-        if ablate_bn:
+        if self.ablate_bn:
             for idx, (name, param) in enumerate(self.named_params):
                 if "conv" in name: # normalize filter layers
                     param = param / torch.norm(param)
@@ -237,7 +237,7 @@ class RMSprop(Optimizer):
                       momentum=group['momentum'],
                       centered=group['centered'])
 
-        if ablate_bn:
+        if self.ablate_bn:
             for idx, (name, param) in enumerate(self.named_params):
                 if "conv" in name: # normalize filter layers
                     param = param / torch.norm(param)
@@ -375,7 +375,7 @@ class Adam(Optimizer):
                    weight_decay=group['weight_decay'],
                    eps=group['eps'])
 
-        if ablate_bn:
+        if self.ablate_bn:
             for idx, (name, param) in enumerate(self.named_params):
                 if "conv" in name: # normalize filter layers
                     param = param / torch.norm(param)
