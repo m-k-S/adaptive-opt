@@ -58,7 +58,7 @@ total_epochs = np.sum(base_epochs)
 if __name__ == "__main__":
 	if expt == "full":
 		for ablation_setting in [True, False]:
-			for optimizer_type in ["SGD", "RMSProp"]:
+			for optimizer_type in ["SGD", "RMSProp", "Adam"]:
 				suffix = "ablate{}_optim{}".format(str(ablation_setting), optimizer_type)
 
 				# Train

@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 
-from optim import SGD, RMSprop
+from optim import SGD, RMSprop, Adam
 from utils import progress_bar
 
 
@@ -33,6 +33,8 @@ def get_optimizer(net, lr, wd, ablate_bn, opt_type="SGD"):
         optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
     elif opt_type == "RMSProp":
         optimizer = RMSprop(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
+    elif opt_type == "Adam":
+        optimizer = Adam(net.parameters(), net.named_parameters(), lr=lr, weight_decay=wd, ablate_bn=ablate_bn)
     return optimizer
 
 class LR_Scheduler(object):
