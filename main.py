@@ -43,7 +43,11 @@ download = True
 lr_warmup = False
 
 trained_root = "trained/"
-device='cpu'
+if torch.cuda.is_available():
+	device='cuda'
+	print ("CUDA available; using GPU")
+else:
+	device='cpu'
 expt = "full" # or "test"
 
 cfg = [64, (64, 2), 128, (128, 2), 256, (256, 2), 512, (512, 2), 512, 512]
