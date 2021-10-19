@@ -53,6 +53,7 @@ class SGD(Optimizer):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
 
         self.named_params = named_params
+        self.ablate_bn = ablate_bn
         super(SGD, self).__init__(params, defaults)
 
     def __setstate__(self, state):
@@ -168,6 +169,7 @@ class RMSprop(Optimizer):
             raise ValueError("Invalid alpha value: {}".format(alpha))
 
         defaults = dict(lr=lr, momentum=momentum, alpha=alpha, eps=eps, centered=centered, weight_decay=weight_decay)
+        self.ablate_bn = ablate_bn
         super(RMSprop, self).__init__(params, defaults)
 
     def __setstate__(self, state):
@@ -304,6 +306,7 @@ class Adam(Optimizer):
             raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
         defaults = dict(lr=lr, betas=betas, eps=eps,
                         weight_decay=weight_decay, amsgrad=amsgrad)
+        self.ablate_bn = ablate_bn
         super(Adam, self).__init__(params, defaults)
 
     def __setstate__(self, state):
