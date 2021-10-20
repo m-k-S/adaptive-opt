@@ -170,6 +170,8 @@ class RMSprop(Optimizer):
 
         defaults = dict(lr=lr, momentum=momentum, alpha=alpha, eps=eps, centered=centered, weight_decay=weight_decay)
         self.ablate_bn = ablate_bn
+        self.named_params = named_params
+
         super(RMSprop, self).__init__(params, defaults)
 
     def __setstate__(self, state):
@@ -307,6 +309,8 @@ class Adam(Optimizer):
         defaults = dict(lr=lr, betas=betas, eps=eps,
                         weight_decay=weight_decay, amsgrad=amsgrad)
         self.ablate_bn = ablate_bn
+        self.named_params = named_params
+
         super(Adam, self).__init__(params, defaults)
 
     def __setstate__(self, state):

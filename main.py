@@ -60,6 +60,11 @@ base_sched, base_epochs, wd = base_sched_iter, base_epochs_iter, wd_base # Train
 total_epochs = np.sum(base_epochs)
 
 if __name__ == "__main__":
+	if not os.path.isdir("trained"):
+		os.mkdir("trained")
+	if not os.path.isdir("datasets"):
+		os.mkdir("datasets")
+
 	if expt == "full":
 		for ablation_setting in [True, False]:
 			for optimizer_type in ["SGD", "RMSProp", "Adam"]:
