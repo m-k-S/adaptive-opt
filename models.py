@@ -81,6 +81,11 @@ class Activs_prober(nn.Module):
         self.activs_corr = []
         self.activs_ranks = []
 
+        if torch.cuda.is_available():
+            device = 'cuda'
+        else:
+            device = 'cpu'
+
         class sim_activs(torch.autograd.Function):
             @staticmethod
             def forward(ctx, input):
@@ -96,7 +101,7 @@ class Activs_prober(nn.Module):
                 self.activs_corr.append(((M.sum(dim=1) - 1) / (M.shape[0]-1)).mean().item())
                 # Activation Ranks (calculates stable rank)
                 tr = torch.diag(M).sum()
-                opnom = torch.linalg.norm(M + 1e-8 * M.mean() * torch.rand(M.shape), ord=2)
+                opnom = torch.linalg.norm(M + 1e-8 * M.mean() * torch.rand(M.shape).to(device), ord=2)
                 self.activs_ranks.append((tr / opnom).item())
                 return input.clone()
 
