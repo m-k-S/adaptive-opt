@@ -72,6 +72,7 @@ if __name__ == "__main__":
 
 				# Train
 				print("\n------------------ Training ------------------\n")
+				print("Training: Ablate {}, Optimizer {}".format(ablation_setting, optimizer_type))
 				best_acc = 0
 				lr_ind = 0
 				epoch = 0
