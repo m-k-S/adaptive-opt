@@ -67,7 +67,8 @@ if __name__ == "__main__":
 
 	if expt == "full":
 		for ablation_setting in [True, False]:
-			for optimizer_type in ["SGD", "RMSProp", "Adam"]:
+			# for optimizer_type in ["SGD", "RMSProp", "Adam"]:
+			for optimizer_type in ["Adam", "SGD"]:
 				suffix = "ablate{}_optim{}".format(str(ablation_setting), optimizer_type)
 
 				# Train

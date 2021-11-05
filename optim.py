@@ -1,6 +1,7 @@
 import torch
 import optim_utils as F
 from optim_utils import Optimizer, required
+import math
 
 def sgd(params,
         d_p_list,
@@ -369,7 +370,7 @@ class Adam(Optimizer):
                     # record the step after step update
                     state_steps.append(state['step'])
 
-            F.adam(params_with_grad,
+            adam(params_with_grad,
                    grads,
                    exp_avgs,
                    exp_avg_sqs,
