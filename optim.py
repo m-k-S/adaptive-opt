@@ -112,7 +112,10 @@ class SGD(Optimizer):
         if self.ablate_bn:
             for idx, (name, param) in enumerate(self.named_params):
                 if "conv" in name: # normalize filter layers
-                    param = param / torch.norm(param)
+                    if param.sum().data[0] == 0:
+                        pass
+                    else:
+                        param = param / torch.norm(param)
 
         return loss
 
