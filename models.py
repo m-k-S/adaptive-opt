@@ -79,7 +79,7 @@ class Activs_prober(nn.Module):
         # Activs
         self.activs_norms = []
         self.activs_corr = []
-        self.activs_ranks = []
+        # self.activs_ranks = []
 
         if torch.cuda.is_available():
             self.device = 'cuda'
@@ -90,20 +90,19 @@ class Activs_prober(nn.Module):
             @staticmethod
             def forward(ctx, input):
                 M = input.clone()
-                print (M)
                 # Activation Variance
-                avar = M.var(dim=[0,2,3], keepdim=True)
-                self.activs_norms.append(avar.mean().item())
+                # avar = M.var(dim=[0,2,3], keepdim=True)
+                # self.activs_norms.append(avar.mean().item())
                 anorms = torch.linalg.norm(M, dim=[1,2,3], keepdim=True)
-                # self.activs_norms.append(anorms.mean().item())
+                self.activs_norms.append(anorms.mean().item())
                 M = (M / anorms).reshape(M.shape[0], -1)
                 M = torch.matmul(M, M.T)
                 # Activation Correlations
                 self.activs_corr.append(((M.sum(dim=1) - 1) / (M.shape[0]-1)).mean().item())
                 # Activation Ranks (calculates stable rank)
-                tr = torch.diag(M).sum()
-                opnom = torch.linalg.norm(M + 1e-8 * M.mean() * torch.rand(M.shape).to(self.device), ord=2)
-                self.activs_ranks.append((tr / opnom).item())
+                # tr = torch.diag(M).sum()
+                # opnom = torch.linalg.norm(M + 1e-8 * M.mean() * torch.rand(M.shape).to(self.device), ord=2)
+                # self.activs_ranks.append((tr / opnom).item())
                 return input.clone()
 
             @staticmethod

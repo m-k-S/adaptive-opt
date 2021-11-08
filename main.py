@@ -87,7 +87,7 @@ if __name__ == "__main__":
 					warmup_lr = base_lr
 					warmup_epochs = 0
 
-				net = VGG(cfg, probe=False).to(device)
+				net = VGG(cfg, probe=probe_layers).to(device)
 				accs_dict = {'Train': [], 'Test': []}
 
 				trainloader, testloader = get_dataloader(dataset, download, batchsize)

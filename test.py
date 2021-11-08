@@ -49,7 +49,7 @@ def net_save(net, accs_dict, lr_warmup, trained_root, suffix, probe_layers=True)
 				  		"grads_list": net.grads_list,
 						"activs_norms": [],
 						"activs_corr": [],
-						"activs_ranks": [],
+						# "activs_ranks": [],
 						"std_list": [],
 						"grads_norms": [],
 						}
@@ -58,7 +58,7 @@ def net_save(net, accs_dict, lr_warmup, trained_root, suffix, probe_layers=True)
 			if(isinstance(mod, Activs_prober)):
 				props_dict["activs_norms"].append(mod.activs_norms)
 				props_dict["activs_corr"].append(mod.activs_corr)
-				props_dict["activs_ranks"].append(mod.activs_ranks)
+				# props_dict["activs_ranks"].append(mod.activs_ranks)
 			if(isinstance(mod, Conv_prober)):
 				props_dict["std_list"].append(mod.std_list)
 				props_dict["grads_norms"].append(mod.grads_norms)
