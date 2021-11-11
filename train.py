@@ -2,6 +2,8 @@ import os
 import sys
 import time
 import math
+import copy
+
 import torch
 import numpy as np
 # import torch.optim as optim
@@ -9,7 +11,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 
-from optim import SGD, RMSprop, Adam
+# from optim import SGD, RMSprop, Adam
+from torch.optim import SGD, RMSprop, Adam
 from utils import progress_bar
 
 
@@ -28,13 +31,22 @@ criterion = nn.CrossEntropyLoss()
 
 ######### Optimizers #########
 
-def get_optimizer(net, lr, wd, ablate_bn, opt_type="SGD"):
+# def get_optimizer(net, lr, wd, ablate_bn, opt_type="SGD"):
+#     if opt_type == "SGD":
+#         optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
+#     elif opt_type == "RMSProp":
+#         optimizer = RMSprop(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
+#     elif opt_type == "Adam":
+#         optimizer = Adam(net.parameters(), net.named_parameters(), lr=lr, weight_decay=wd, ablate_bn=ablate_bn)
+#     return optimizer
+
+def get_optimizer(net, lr, wd, opt_type="SGD"):
     if opt_type == "SGD":
-        optimizer = SGD(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
+        optimizer = SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
     elif opt_type == "RMSProp":
-        optimizer = RMSprop(net.parameters(), net.named_parameters(), lr=lr, momentum=0.9, weight_decay=wd, ablate_bn=ablate_bn)
+        optimizer = RMSprop(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
     elif opt_type == "Adam":
-        optimizer = Adam(net.parameters(), net.named_parameters(), lr=lr, weight_decay=wd, ablate_bn=ablate_bn)
+        optimizer = Adam(net.parameters(), lr=lr, weight_decay=wd)
     return optimizer
 
 class LR_Scheduler(object):
@@ -59,9 +71,21 @@ class LR_Scheduler(object):
     def get_lr(self):
         return self.current_lr
 
+
+def rescale(net, net_base):
+    for mod, mod_base in zip(net.modules(), net_base.modules()):
+        if(isinstance(mod, nn.Conv2d)):
+            #print( 'before='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
+            mod.weight.data = (mod.weight.data / torch.linalg.norm(mod.weight, dim=(1,2,3), keepdim=True)) * torch.linalg.norm(mod_base.weight, dim=(1,2,3), keepdim=True)
+            #print( 'after='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
+    #print('end!')
+    return net
+
 ######### Training functions #########
 # Training
-def train(net, trainloader, device, optimizer, criterion, scheduler):
+def train(net, trainloader, device, optimizer, criterion, scheduler, ablate_bn=False):
+    net_base = copy.deepcopy(net)
+    net_base.to(device)
     net.train()
     train_loss = 0
     correct = 0
@@ -75,6 +99,10 @@ def train(net, trainloader, device, optimizer, criterion, scheduler):
         loss.backward()
         optimizer.step()
         scheduler.step()
+
+        if ablate_bn:
+            net = rescale(net, net_base)
+
         train_loss += loss.item()
         _, predicted = outputs.max(1)
         total += targets.size(0)

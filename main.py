@@ -31,8 +31,8 @@ args = parser.parse_args()
 ### temporary hard coded args ###
 p_grouping = 32
 probe_layers = True
-ablate_bn = False # remove adaptive optimization that arises from BN
 skipinit = False
+ablate_bn=False
 preact = False
 dataset = "CIFAR-100"
 init_lr = 1
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 				accs_dict = {'Train': [], 'Test': []}
 
 				trainloader, testloader = get_dataloader(dataset, download, batchsize)
-				optimizer = get_optimizer(net, opt_type=optimizer_type, lr=warmup_lr, wd=wd, ablate_bn=ablation_setting)
+				optimizer = get_optimizer(net, opt_type=optimizer_type, lr=warmup_lr, wd=wd)
 				scheduler = LR_Scheduler(optimizer, warmup_epochs=warmup_epochs, warmup_lr=warmup_lr, num_epochs=total_epochs, base_lr=base_lr, final_lr=final_lr, iter_per_epoch=len(trainloader))
 
 				stop_train = False
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 					print("\n--learning rate is {}".format(optimizer.param_groups[0]['lr']))
 					for n in range(base_epochs[lr_ind]):
 						print('\nEpoch: {}'.format(epoch))
-						train_acc, stop_train = train(net, trainloader, device, optimizer, criterion, scheduler)
+						train_acc, stop_train = train(net, trainloader, device, optimizer, criterion, scheduler, ablation_setting)
 						if(stop_train):
 							break
 						test_acc = test(net, testloader, device, criterion)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 		accs_dict = {'Train': [], 'Test': []}
 
 		trainloader, testloader = get_dataloader(dataset, download, batchsize)
-		optimizer = get_optimizer(net, opt_type=opt_type, lr=warmup_lr, wd=wd, ablate_bn=ablate_bn)
+		optimizer = get_optimizer(net, opt_type=opt_type, lr=warmup_lr, wd=wd)
 		scheduler = LR_Scheduler(optimizer, warmup_epochs=warmup_epochs, warmup_lr=warmup_lr, num_epochs=total_epochs, base_lr=base_lr, final_lr=final_lr, iter_per_epoch=len(trainloader))
 
 		stop_train = False
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 			print("\n--learning rate is {}".format(optimizer.param_groups[0]['lr']))
 			for n in range(base_epochs[lr_ind]):
 				print('\nEpoch: {}'.format(epoch))
-				train_acc, stop_train = train(net, trainloader, device, optimizer, criterion, scheduler)
+				train_acc, stop_train = train(net, trainloader, device, optimizer, criterion, scheduler, ablate_bn)
 				if(stop_train):
 					break
 				test_acc = test(net, testloader, device, criterion)
