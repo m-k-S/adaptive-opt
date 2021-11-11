@@ -82,7 +82,7 @@ def rescale(net, net_base):
 
 ######### Training functions #########
 # Training
-def train(net, net_base, trainloader, device, optimizer, criterion, scheduler, ablate_bn=False):
+def train(net, net_base, trainloader, device, optimizer, criterion, ablate_bn=False):
     net.train()
     train_loss = 0
     correct = 0
@@ -95,7 +95,6 @@ def train(net, net_base, trainloader, device, optimizer, criterion, scheduler, a
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
-        scheduler.step()
 
         if ablate_bn:
             net = rescale(net, net_base)
