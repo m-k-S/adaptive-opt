@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import math
-import copy
 
 import torch
 import numpy as np
@@ -83,9 +82,7 @@ def rescale(net, net_base):
 
 ######### Training functions #########
 # Training
-def train(net, trainloader, device, optimizer, criterion, scheduler, ablate_bn=False):
-    net_base = copy.deepcopy(net)
-    net_base.to(device)
+def train(net, net_base, trainloader, device, optimizer, criterion, scheduler, ablate_bn=False):
     net.train()
     train_loss = 0
     correct = 0
