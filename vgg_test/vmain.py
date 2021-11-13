@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.optim
+from torch.optim import lr_scheduler
 import copy
 
 from vtrain import get_dataloader, get_optimizer, FindLR, train, eval, net_save
@@ -39,13 +39,13 @@ if __name__ == "__main__":
             net_base = copy.deepcopy(net).to(device)
 
             optimizer = get_optimizer(net, opt_type=optimizer_type, lr=base_lr, wd=wd)
-            lr_scheduler = torch.optim.ExponentialLR(optimizer, gamma=0.9)
+            scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
             accs_dict = {'Train': [], 'Test': []}
 
             for epoch in range(epochs):
                 train_acc = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
-                lr_scheduler.step()
+                scheduler.step()
                 test_acc = eval(net, testloader, criterion, device, epoch=epoch)
 
                 accs_dict['Train'].append(train_acc)
