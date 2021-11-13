@@ -41,7 +41,7 @@ if __name__ == "__main__":
             optimizer = get_optimizer(net, opt_type=optimizer_type, lr=base_lr, wd=wd)
             scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
-            accs_dict = {'Train': [], 'Test': []}
+            accs_dict = {'Train': [], 'Test': [], 'lr': []}
 
             for epoch in range(epochs):
                 train_acc = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
                 accs_dict['Train'].append(train_acc)
                 accs_dict['Test'].append(test_acc)
+                accs_dict['lr'].append(optimizer.param_groups[0]['lr'])
 
                 if (epoch+1) % 25 == 0:
-                    net_save(net, accs_dict, lr_scheduler.get_lr(), trained_root, suffix)
+                    net_save(net, accs_dict, trained_root, suffix)

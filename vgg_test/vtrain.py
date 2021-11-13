@@ -150,9 +150,14 @@ def eval(net, dataloader, criterion, device, epoch=0, tb=True):
 
     return correct.float() / len(dataloader.dataset)
 
-def net_save(net, accs_dict, lr, trained_root, suffix):
+def net_save(net, accs_dict, trained_root, suffix):
 	print('Saving Model...')
-	state = {'net': net.state_dict(), 'Train_acc': accs_dict['Train'], 'Test_acc': accs_dict['Test']}
+	state = {
+        'net': net.state_dict(),
+        'Train_acc': accs_dict['Train'],
+        'Test_acc': accs_dict['Test'],
+        'lr': accs_dict['lr'],
+    }
 
 	torch.save(state, trained_root + 'VGG_model_{}.pth'.format(suffix))
 
