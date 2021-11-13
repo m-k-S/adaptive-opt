@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.optim
 import copy
 
 from vtrain import get_dataloader, get_optimizer, FindLR, train, eval, net_save
@@ -19,9 +20,7 @@ download = True
 batch_size = 32
 
 base_lr = 0.1
-wd = 0.3
-max_lr = 10
-num_iter = 100
+wd = 1e-4
 
 trainloader, testloader = get_dataloader(dataset, download, batch_size)
 
@@ -29,7 +28,7 @@ criterion = nn.CrossEntropyLoss()
 
 if __name__ == "__main__":
     for optimizer_type in ["SGD", "Adam"]:
-        for ablate in [True, False]:
+        for ablate in [False, True]:
             suffix = "ablate{}_optim{}".format(str(ablate), optimizer_type)
 
             # Train
@@ -40,12 +39,13 @@ if __name__ == "__main__":
             net_base = copy.deepcopy(net).to(device)
 
             optimizer = get_optimizer(net, opt_type=optimizer_type, lr=base_lr, wd=wd)
-            lr_scheduler = FindLR(optimizer, max_lr=max_lr, num_iter=num_iter)
+            lr_scheduler = torch.optim.ExponentialLR(optimizer, gamma=0.9)
 
             accs_dict = {'Train': [], 'Test': []}
 
             for epoch in range(epochs):
                 train_acc = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
+                lr_scheduler.step()
                 test_acc = eval(net, testloader, criterion, device, epoch=epoch)
 
                 accs_dict['Train'].append(train_acc)

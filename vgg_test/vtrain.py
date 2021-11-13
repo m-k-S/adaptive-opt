@@ -109,7 +109,7 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
             epoch=epoch,
             trained_samples=batch_index * batch_size + len(images),
             total_samples=len(dataloader.dataset)
-        ))
+        ), end="\r")
 
     finish = time.time()
 
