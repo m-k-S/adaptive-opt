@@ -2,6 +2,7 @@ import time
 import pickle as pkl
 
 import torch
+import torch.nn as nn
 import torchvision
 
 from torchvision import models, transforms
@@ -79,6 +80,7 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
     net.train()
 
     correct = 0.0
+    total = 0.0
 
     for batch_index, (images, labels) in enumerate(dataloader):
 
@@ -91,9 +93,9 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
         loss.backward()
         optimizer.step()
 
-        with torch.no_grad:
-            _, preds = outputs.max(1)
-            correct += preds.eq(labels).sum()
+        _, preds = outputs.max(1)
+        correct += preds.eq(labels).sum()
+        total += batch_size
 
         if ablate:
             net = rescale(net, net_base)
@@ -101,7 +103,7 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
         n_iter = (epoch - 1) * len(dataloader) + batch_index + 1
 
         print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tAccuracy: {:0.4f}\tLoss: {:0.4f}\tLR: {:0.6f}'.format(
-
+            correct.float() / total,
             loss.item(),
             optimizer.param_groups[0]['lr'],
             epoch=epoch,
