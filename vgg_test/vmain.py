@@ -25,11 +25,6 @@ trainloader, testloader = get_dataloader(dataset, download, batch_size)
 
 criterion = nn.CrossEntropyLoss()
 
-# for optimizer_type in ["SGD", "Adam", "RMSprop", "AdamW", "KFAC", "AggMo", "AdaBelief"]:
-#     for ablate in [False, True]:
-#         for scheduler_setting in ["sched", 0.1, 1e-2, 1e-3]:
-#             for wd in [1e-4, 0]:
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--optim', type=str, required=True, help='optimizer type')
@@ -67,7 +62,7 @@ if __name__ == "__main__":
 
     accs_dict = {'Train': [], 'Test': [], 'lr': []}
 
-    for epoch in range(epochs):
+    for epoch in range(24, epochs):
         train_acc = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
 
         if scheduler_setting == "sched":

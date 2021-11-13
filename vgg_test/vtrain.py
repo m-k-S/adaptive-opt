@@ -8,6 +8,7 @@ import torchvision
 from torchvision import models, transforms
 from torch.optim import SGD, Adam, RMSprop, AdamW
 
+from vmodel import Activs_prober, Conv_prober
 from aggmo import AggMo
 from adabelief import AdaBelief
 # from kfac import KFAC

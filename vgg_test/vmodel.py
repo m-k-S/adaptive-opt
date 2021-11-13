@@ -102,6 +102,12 @@ class VGG(nn.Module):
             nn.Linear(4096, num_class)
         )
 
+        self.params_list = []
+        self.grads_list = []
+        for _ in features:
+            self.params_list.append([])
+            self.grads_list.append([])
+
     def forward(self, x):
         output = self.features(x)
         output = output.view(output.size()[0], -1)
