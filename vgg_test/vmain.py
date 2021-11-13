@@ -19,38 +19,47 @@ dataset = "CIFAR-100"
 download = True
 batch_size = 32
 
-base_lr = 0.1
-wd = 1e-4
-
 trainloader, testloader = get_dataloader(dataset, download, batch_size)
 
 criterion = nn.CrossEntropyLoss()
 
 if __name__ == "__main__":
-    for optimizer_type in ["SGD", "Adam"]:
+    for optimizer_type in ["SGD", "Adam", "RMSprop", "AdamW", "KFAC", "AggMo", "AdaBelief"]:
         for ablate in [False, True]:
-            suffix = "ablate{}_optim{}".format(str(ablate), optimizer_type)
+            for scheduler_setting in ["sched", 0.1, 1e-2, 1e-3]:
+                for wd in [1e-4, 0]:
+                    suffix = "ablate{}_optim{}_lr{}_wd{}".format(str(ablate), optimizer_type, scheduler_setting, wd)
 
-            # Train
-            print("\n------------------ Training ------------------\n")
-            print("Training: Ablate {}, Optimizer {}".format(ablate, optimizer_type))
+                    # Train
+                    print("\n------------------ Training ------------------\n")
+                    print("Training: Ablate {}, Optimizer {}, LR Scheduler {}, Weight Decay {}".format(ablate, optimizer_type, scheduler_setting, wd))
 
-            net = vgg16_bn().to(device)
-            net_base = copy.deepcopy(net).to(device)
+                    net = vgg16_bn().to(device)
+                    net_base = copy.deepcopy(net).to(device)
 
-            optimizer = get_optimizer(net, opt_type=optimizer_type, lr=base_lr, wd=wd)
-            scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+                    if scheduler_setting == "sched":
+                        base_lr = 0.1
+                    else:
+                        base_lr = scheduler_setting
 
-            accs_dict = {'Train': [], 'Test': [], 'lr': []}
+                    optimizer = get_optimizer(net, opt_type=optimizer_type, lr=base_lr, wd=wd)
 
-            for epoch in range(epochs):
-                train_acc = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
-                scheduler.step()
-                test_acc = eval(net, testloader, criterion, device, epoch=epoch)
+                    if scheduler_setting == "sched":
+                        scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
-                accs_dict['Train'].append(train_acc)
-                accs_dict['Test'].append(test_acc)
-                accs_dict['lr'].append(optimizer.param_groups[0]['lr'])
+                    accs_dict = {'Train': [], 'Test': [], 'lr': []}
 
-                if (epoch+1) % 25 == 0:
-                    net_save(net, accs_dict, trained_root, suffix)
+                    for epoch in range(epochs):
+                        train_acc = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
+
+                        if scheduler_setting == "sched":
+                            scheduler.step()
+
+                        test_acc = eval(net, testloader, criterion, device, epoch=epoch)
+
+                        accs_dict['Train'].append(train_acc)
+                        accs_dict['Test'].append(test_acc)
+                        accs_dict['lr'].append(optimizer.param_groups[0]['lr'])
+
+                        if (epoch+1) % 25 == 0:
+                            net_save(net, accs_dict, trained_root, suffix)

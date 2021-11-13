@@ -6,8 +6,12 @@ import torch.nn as nn
 import torchvision
 
 from torchvision import models, transforms
-from torch.optim import SGD, Adam, RMSprop
+from torch.optim import SGD, Adam, RMSprop, AdamW
 from torch.optim.lr_scheduler import _LRScheduler
+
+from aggmo import AggMo
+from adabelief import AdaBelief
+from kfac import KFACOptimizer
 
 
 class FindLR(_LRScheduler):
@@ -63,6 +67,14 @@ def get_optimizer(net, lr, wd, opt_type="SGD"):
         optimizer = RMSprop(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
     elif opt_type == "Adam":
         optimizer = Adam(net.parameters(), lr=lr, weight_decay=wd)
+    elif opt_type == "AdamW":
+        optimizer = AdamW(net.parameters(), lr=lr, weight_decay=wd)
+    elif opt_type == "KFAC":
+        optimizer = KFACOptimizer(net.parameters(), lr=lr, weight_decay=wd)
+    elif opt_type == "AggMo":
+        optimizer = AggMo(net.parameters(), lr=lr, weight_decay=wd)
+    elif opt_type == "AdaBelief":
+        optimizer = AdaBelief(net.parameters(), lr=lr, weight_decay=wd)
     return optimizer
 
 def rescale(net, net_base):
