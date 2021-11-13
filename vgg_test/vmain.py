@@ -7,7 +7,7 @@ from vtrain import get_dataloader, get_optimizer, FindLR, train, eval, net_save
 from vmodel import vgg16_bn
 
 #### HYPERPARAMETERS ####
-epochs = 200
+epochs = 100
 
 trained_root = "trained/"
 if torch.cuda.is_available():
@@ -51,5 +51,5 @@ if __name__ == "__main__":
                 accs_dict['Train'].append(train_acc)
                 accs_dict['Test'].append(test_acc)
 
-                if epoch+1 % 25 == 0:
+                if (epoch+1) % 25 == 0:
                     net_save(net, accs_dict, lr_scheduler.get_lr(), trained_root, suffix)
