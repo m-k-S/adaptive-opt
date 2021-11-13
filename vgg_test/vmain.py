@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     accs_dict = {'Train': [], 'Test': [], 'lr': []}
 
-    for epoch in range(24, epochs):
+    for epoch in range(epochs):
         train_acc = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
 
         if scheduler_setting == "sched":
