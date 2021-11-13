@@ -5,7 +5,7 @@
 declare -a optimizers=("SGD", "Adam", "RMSprop", "AdamW", "AggMo", "AdaBelief")
 declare -a ablate_vals=("--ablate", "")
 declare -a lr_vals=("sched", "0.1", "1e-2", "1e-3")
-declare -a wd_vals =("1e-4", "0")
+declare -a wd_vals=("1e-4", "0")
 
 output_filename="run_parallel_calls.sh"
 batch_size=6
