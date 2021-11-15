@@ -49,8 +49,10 @@ if __name__ == "__main__":
     print("\n------------------ Training ------------------\n")
     print("Training: Ablate {}, Optimizer {}, LR Scheduler {}, Weight Decay {}, Momentum {}".format(ablate, optimizer_type, scheduler_setting, wd, mom))
 
-    net = vgg16_bn().to(device)
-    net_base = copy.deepcopy(net).to(device)
+    net = vgg16_bn()
+    net_base = copy.deepcopy(net)
+    net = nn.DataParallel(net).to(device)
+    net_base = nn.DataParallel(net_base).to(device)
 
     if scheduler_setting == "sched":
         base_lr = 0.1
