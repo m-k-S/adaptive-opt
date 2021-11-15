@@ -43,15 +43,13 @@ def get_dataloader(use_data, download, bsize):
 
 	return trainloader, testloader
 
-def get_optimizer(net, lr, wd, opt_type="SGD"):
+def get_optimizer(net, lr, wd, mom, opt_type="SGD"):
     if opt_type == "SGD":
-        optimizer = SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
+        optimizer = SGD(net.parameters(), lr=lr, momentum=mom, weight_decay=wd)
     elif opt_type == "RMSProp":
-        optimizer = RMSprop(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
+        optimizer = RMSprop(net.parameters(), lr=lr, momentum=mom, weight_decay=wd)
     elif opt_type == "Adam":
         optimizer = Adam(net.parameters(), lr=lr, weight_decay=wd)
-    elif opt_type == "AdamW":
-        optimizer = AdamW(net.parameters(), lr=lr, weight_decay=wd)
     # elif opt_type == "KFAC":
     #     optimizer = KFAC(net, damping=False, learning_rate=lr, weight_decay=wd)
     elif opt_type == "AggMo":
@@ -109,7 +107,7 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
     finish = time.time()
 
     print('epoch {} training time consumed: {:.2f}s'.format(epoch, finish - start))
-    return correct.float() / len(dataloader.dataset)
+    return correct.float() / len(dataloader.dataset), loss.item()
 
 @torch.no_grad()
 def eval(net, dataloader, criterion, device, epoch=0, tb=True):
@@ -143,7 +141,7 @@ def eval(net, dataloader, criterion, device, epoch=0, tb=True):
     ))
     print()
 
-    return correct.float() / len(dataloader.dataset)
+    return correct.float() / len(dataloader.dataset), test_loss / len(dataloader.dataset)
 
 def net_save(net, accs_dict, trained_root, suffix):
 	print('Saving Model...')
