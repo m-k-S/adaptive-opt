@@ -9,7 +9,7 @@ declare -a wd_vals=("1e-4" "0")
 declare -a mom_vals=("0" "0.9")
 
 output_filename="run_parallel_calls.sh"
-batch_size=24
+batch_size=6
 
 #####################################################################################################
 
