@@ -71,7 +71,8 @@ def rescale(net, net_base):
             #print( 'before='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
             mod.weight.data = (mod.weight.data / torch.linalg.norm(mod.weight, dim=(1,2,3), keepdim=True)) * torch.linalg.norm(mod_base.weight, dim=(1,2,3), keepdim=True)
             #print( 'after='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
-            param_norms[idx] = torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]
+            saved_weights = torch.clone(mod.weight).detach()
+            param_norms[idx] = torch.norm(torch.norm(saved_weights, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]
     #print('end!')
     return net, param_norms
 
