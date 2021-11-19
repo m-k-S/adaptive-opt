@@ -177,7 +177,7 @@ def net_save(net, accs_dict, trained_root, suffix, ablate=False):
         "grads_norms": [],
     }
 
-    if ablate:
+    if ablate == True:
         props_dict['param_norms_ablated'] = accs_dict['param_norms']
 
 	for mod in net.modules():
