@@ -25,18 +25,24 @@ def get_dataloader(use_data, download, bsize):
 		 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 		 ])
 
-	d_path = "../"
-	if(use_data=="CIFAR-10"):
+	d_path = "./"
+	if (use_data=="CIFAR-10"):
 		n_classes = 10
-		trainset = torchvision.datasets.CIFAR10(root=d_path+'datasets/cifar10/', train=True, download=(download), transform=transform)
+        trainset = torchvision.datasets.CIFAR10(root=d_path+'datasets/cifar10/', train=True, download=(download), transform=transform)
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=bsize, shuffle=True, num_workers=2)
+        testset = torchvision.datasets.CIFAR10(root=d_path+'datasets/cifar10/', train=False, download=(download), transform=transform_test)
+        testloader = torch.utils.data.DataLoader(testset, batch_size=bsize, shuffle=False, num_workers=2)
+    elif (use_data=="CIFAR-100"):
+        n_classes = 100
+        trainset = torchvision.datasets.CIFAR100(root=d_path+'datasets/cifar100/', train=True, download=(download), transform=transform)
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=bsize, shuffle=True, num_workers=2)
+        testset = torchvision.datasets.CIFAR100(root=d_path+'datasets/cifar100/', train=False, download=(download), transform=transform_test)
+        testloader = torch.utils.data.DataLoader(testset, batch_size=bsize, shuffle=False, num_workers=2)
+    elif (use_data=="MNIST"):
+        n_classes = 10
+        trainset = torchvision.datasets.MNIST(root=d_path+'datasets/mnist/', train=True, download=(download), transform=transform)
 		trainloader = torch.utils.data.DataLoader(trainset, batch_size=bsize, shuffle=True, num_workers=2)
-		testset = torchvision.datasets.CIFAR10(root=d_path+'datasets/cifar10/', train=False, download=(download), transform=transform_test)
-		testloader = torch.utils.data.DataLoader(testset, batch_size=bsize, shuffle=False, num_workers=2)
-	elif(use_data=="CIFAR-100"):
-		n_classes = 100
-		trainset = torchvision.datasets.CIFAR100(root=d_path+'datasets/cifar100/', train=True, download=(download), transform=transform)
-		trainloader = torch.utils.data.DataLoader(trainset, batch_size=bsize, shuffle=True, num_workers=2)
-		testset = torchvision.datasets.CIFAR100(root=d_path+'datasets/cifar100/', train=False, download=(download), transform=transform_test)
+		testset = torchvision.datasets.MNIST(root=d_path+'datasets/mnist/', train=False, download=(download), transform=transform_test)
 		testloader = torch.utils.data.DataLoader(testset, batch_size=bsize, shuffle=False, num_workers=2)
 	else:
 		raise Exception("Not CIFAR-10/CIFAR-100")
@@ -59,13 +65,15 @@ def get_optimizer(net, lr, wd, mom, opt_type="SGD"):
     return optimizer
 
 def rescale(net, net_base):
-    for mod, mod_base in zip(net.modules(), net_base.modules()):
+    param_norms = {}
+    for idx, (mod, mod_base) in enumerate(zip(net.modules(), net_base.modules())):
         if(isinstance(mod, nn.Conv2d)):
             #print( 'before='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
             mod.weight.data = (mod.weight.data / torch.linalg.norm(mod.weight, dim=(1,2,3), keepdim=True)) * torch.linalg.norm(mod_base.weight, dim=(1,2,3), keepdim=True)
             #print( 'after='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
+            param_norms[idx] = torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]
     #print('end!')
-    return net
+    return net, param_norms
 
 def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, epoch, ablate=False):
 
@@ -74,6 +82,8 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
 
     correct = 0.0
     total = 0.0
+
+    param_norms_epoch = []
 
     for batch_index, (images, labels) in enumerate(dataloader):
 
@@ -91,7 +101,8 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
         total += batch_size
 
         if ablate:
-            net = rescale(net, net_base)
+            net, param_norms = rescale(net, net_base)
+            param_norms_epoch.append(param_norms)
 
         n_iter = (epoch - 1) * len(dataloader) + batch_index + 1
 
@@ -107,7 +118,7 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
     finish = time.time()
 
     print('epoch {} training time consumed: {:.2f}s'.format(epoch, finish - start))
-    return correct.float() / len(dataloader.dataset), loss.item()
+    return correct.float() / len(dataloader.dataset), loss.item(), param_norms_epoch
 
 @torch.no_grad()
 def eval(net, dataloader, criterion, device, epoch=0, tb=True):
@@ -143,7 +154,7 @@ def eval(net, dataloader, criterion, device, epoch=0, tb=True):
 
     return correct.float() / len(dataloader.dataset), test_loss / len(dataloader.dataset)
 
-def net_save(net, accs_dict, trained_root, suffix):
+def net_save(net, accs_dict, trained_root, suffix, ablate=False):
 	print('Saving Model...')
 	state = {
         'net': net.state_dict(),
@@ -164,6 +175,9 @@ def net_save(net, accs_dict, trained_root, suffix):
 					"std_list": [],
 					"grads_norms": [],
 					}
+
+    if ablate:
+        props_dict['param_norms_ablated'] = accs_dict['param_norms']
 
 	for mod in net.modules():
 		if(isinstance(mod, Activs_prober)):

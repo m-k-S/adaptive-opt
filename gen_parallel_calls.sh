@@ -2,9 +2,10 @@
 # Usage: ./gen_parallel_calls.sh
 # Runs tests for varying parameters in batches of 8
 
-declare -a optimizers=("SGD" "Adam" "RMSprop" "AggMo" "AdaBelief")
+declare -a optimizers=("SGD" "Adam" "RMSprop")
 declare -a ablate_vals=("--ablate" "")
-declare -a lr_vals=("sched" "0.1" "1e-2")
+# declare -a lr_vals=("sched" "0.1" "1e-2" "1e-3")
+declare -a lr_vals=("0.1" "1e-2" "1e-3" "1e-4")
 declare -a wd_vals=("1e-4" "0")
 declare -a mom_vals=("0" "0.9")
 
