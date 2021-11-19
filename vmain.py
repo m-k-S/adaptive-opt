@@ -17,7 +17,7 @@ if torch.cuda.is_available():
 	print ("CUDA available; using GPU")
 else:
 	device='cpu'
-dataset = "CIFAR-10"
+dataset = "CIFAR-100"
 download = True
 batch_size = 32
 
