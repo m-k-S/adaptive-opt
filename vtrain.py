@@ -150,6 +150,8 @@ def net_save(net, accs_dict, trained_root, suffix):
         'Train_acc': accs_dict['Train'],
         'Test_acc': accs_dict['Test'],
         'lr': accs_dict['lr'],
+        'train_loss': accs_dict['train_loss'],
+        'test_loss': accs_dict['test_loss']
     }
 
 	torch.save(state, trained_root + 'VGG_model_{}.pth'.format(suffix))
