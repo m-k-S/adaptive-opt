@@ -155,8 +155,8 @@ def eval(net, dataloader, criterion, device, epoch=0, tb=True):
     return correct.float() / len(dataloader.dataset), test_loss / len(dataloader.dataset)
 
 def net_save(net, accs_dict, trained_root, suffix, ablate=False):
-	print('Saving Model...')
-	state = {
+    print('Saving Model...')
+    state = {
         'net': net.state_dict(),
         'Train_acc': accs_dict['Train'],
         'Test_acc': accs_dict['Test'],
@@ -165,29 +165,30 @@ def net_save(net, accs_dict, trained_root, suffix, ablate=False):
         'test_loss': accs_dict['test_loss']
     }
 
-	torch.save(state, trained_root + 'VGG_model_{}.pth'.format(suffix))
+    torch.save(state, trained_root + 'VGG_model_{}.pth'.format(suffix))
 
-	props_dict = {"params_list": net.params_list,
-			  		"grads_list": net.grads_list,
-					"activs_norms": [],
-					"activs_corr": [],
-					# "activs_ranks": [],
-					"std_list": [],
-					"grads_norms": [],
-					}
+    props_dict = {
+        "params_list": net.params_list,
+        "grads_list": net.grads_list,
+        "activs_norms": [],
+        "activs_corr": [],
+        # "activs_ranks": [],
+        "std_list": [],
+        "grads_norms": [],
+    }
 
     if ablate:
         props_dict['param_norms_ablated'] = accs_dict['param_norms']
 
 	for mod in net.modules():
-		if(isinstance(mod, Activs_prober)):
-			props_dict["activs_norms"].append(mod.activs_norms)
-			props_dict["activs_corr"].append(mod.activs_corr)
-			# props_dict["activs_ranks"].append(mod.activs_ranks)
-		if(isinstance(mod, Conv_prober)):
-			props_dict["std_list"].append(mod.std_list)
-			props_dict["grads_norms"].append(mod.grads_norms)
+        if(isinstance(mod, Activs_prober)):
+            props_dict["activs_norms"].append(mod.activs_norms)
+            props_dict["activs_corr"].append(mod.activs_corr)
+            # props_dict["activs_ranks"].append(mod.activs_ranks)
+        if(isinstance(mod, Conv_prober)):
+            props_dict["std_list"].append(mod.std_list)
+            props_dict["grads_norms"].append(mod.grads_norms)
 
-	print('Saving properties...')
-	with open(trained_root + "properties_{}.pkl".format(suffix), 'wb') as f:
-		pkl.dump(props_dict, f)
+    print('Saving properties...')
+    with open(trained_root + "properties_{}.pkl".format(suffix), 'wb') as f:
+        pkl.dump(props_dict, f)
