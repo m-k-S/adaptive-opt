@@ -31,9 +31,6 @@ do
      do
        let CTR=CTR+1
        echo "python3 vmain.py --optim $opt $ablate --lr $lr --wd $wd --mom $m &" >> $output_filename
-       if ! (($CTR % $batch_size)); then
-    	   echo "wait" >> $output_filename
-       fi
      done
    elif [ $opt == "RMSprop" ];
    then
@@ -41,16 +38,13 @@ do
      do
        let CTR=CTR+1
        echo "python3 vmain.py --optim $opt $ablate --lr $lr --wd $wd --mom $m &" >> $output_filename
-       if ! (($CTR % $batch_size)); then
-    	   echo "wait" >> $output_filename
-       fi
      done
    else
      let CTR=CTR+1
      echo "python3 vmain.py --optim $opt $ablate --lr $lr --wd $wd &" >> $output_filenam
-     if ! (($CTR % $batch_size)); then
-  	   echo "wait" >> $output_filename
-     fi
+   fi
+   if ! (($CTR % $batch_size)); then
+    echo "wait" >> $output_filename
    fi
 
 done
