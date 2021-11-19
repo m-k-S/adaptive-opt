@@ -52,7 +52,7 @@ def get_dataloader(use_data, download, bsize):
 def get_optimizer(net, lr, wd, mom, opt_type="SGD"):
     if opt_type == "SGD":
         optimizer = SGD(net.parameters(), lr=lr, momentum=mom, weight_decay=wd)
-    elif opt_type == "RMSProp":
+    elif opt_type == "RMSprop":
         optimizer = RMSprop(net.parameters(), lr=lr, momentum=mom, weight_decay=wd)
     elif opt_type == "Adam":
         optimizer = Adam(net.parameters(), lr=lr, weight_decay=wd)
