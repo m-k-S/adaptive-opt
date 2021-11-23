@@ -71,10 +71,10 @@ def rescale(net, net_base):
             #print( 'before='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
             mod.weight.data = (mod.weight.data / torch.linalg.norm(mod.weight, dim=(1,2,3), keepdim=True)) * torch.linalg.norm(mod_base.weight, dim=(1,2,3), keepdim=True)
             #print( 'after='+ str( torch.norm(torch.norm(mod.weight, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]) )
-            saved_weights = torch.clone(mod.weight).detach()
-            param_norms[idx] = torch.norm(torch.norm(saved_weights, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]
+            # saved_weights = torch.clone(mod.weight).detach()
+            # param_norms[idx] = torch.norm(torch.norm(saved_weights, dim=(2,3), keepdim=True), dim=1, keepdim=True)[1]
     #print('end!')
-    return net, param_norms
+    return net
 
 def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, epoch, ablate=False):
 
@@ -83,8 +83,6 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
 
     correct = 0.0
     total = 0.0
-
-    param_norms_epoch = []
 
     for batch_index, (images, labels) in enumerate(dataloader):
 
@@ -102,8 +100,7 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
         total += batch_size
 
         if ablate:
-            net, param_norms = rescale(net, net_base)
-            param_norms_epoch.append(param_norms)
+            net = rescale(net, net_base)
 
         n_iter = (epoch - 1) * len(dataloader) + batch_index + 1
 
@@ -119,7 +116,7 @@ def train(net, net_base, dataloader, optimizer, criterion, device, batch_size, e
     finish = time.time()
 
     print('epoch {} training time consumed: {:.2f}s'.format(epoch, finish - start))
-    return correct.float() / len(dataloader.dataset), loss.item(), param_norms_epoch
+    return correct.float() / len(dataloader.dataset), loss.item()
 
 @torch.no_grad()
 def eval(net, dataloader, criterion, device, epoch=0, tb=True):
@@ -177,9 +174,6 @@ def net_save(net, accs_dict, trained_root, suffix, ablate=False):
         "std_list": [],
         "grads_norms": [],
     }
-
-    if ablate == True:
-        props_dict['param_norms_ablated'] = accs_dict['param_norms']
 
     for mod in net.modules():
         if(isinstance(mod, Activs_prober)):

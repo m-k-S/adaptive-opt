@@ -5,7 +5,7 @@
 declare -a optimizers=("SGD" "Adam" "RMSprop")
 declare -a ablate_vals=("--ablate" "")
 # declare -a lr_vals=("sched" "0.1" "1e-2" "1e-3")
-declare -a lr_vals=("0.1" "1e-2" "1e-3" "1e-4")
+declare -a lr_vals=("1e-2" "1e-3" "1e-4")
 declare -a wd_vals=("1e-4" "0")
 declare -a mom_vals=("0" "0.9")
 

@@ -9,7 +9,7 @@ from vtrain import get_dataloader, get_optimizer, train, eval, net_save
 from vmodel import vgg16_bn
 
 #### HYPERPARAMETERS ####
-epochs = 100
+epochs = 75
 
 trained_root = "trained/"
 if torch.cuda.is_available():
@@ -17,7 +17,7 @@ if torch.cuda.is_available():
 	print ("CUDA available; using GPU")
 else:
 	device='cpu'
-dataset = "CIFAR-100"
+dataset = "CIFAR-10"
 download = True
 batch_size = 32
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     accs_dict = {'Train': [], 'Test': [], 'lr': [], 'train_loss': [], 'test_loss': [], 'param_norms': []}
 
     for epoch in range(epochs):
-        train_acc, train_loss, param_norms_epoch = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
+        train_acc, train_loss = train(net, net_base, trainloader, optimizer, criterion, device, batch_size, epoch, ablate=ablate)
 
         if scheduler_setting == "sched":
             scheduler.step()
@@ -77,9 +77,6 @@ if __name__ == "__main__":
         accs_dict['lr'].append(optimizer.param_groups[0]['lr'])
         accs_dict['train_loss'].append(train_acc)
         accs_dict['test_loss'].append(test_loss)
-
-        if ablate:
-            accs_dict['param_norms'].append(param_norms_epoch)
 
         if (epoch+1) % 25 == 0:
             net_save(net, accs_dict, trained_root, suffix, ablate)
